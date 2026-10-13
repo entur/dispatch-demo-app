@@ -1,0 +1,33 @@
+name: probe
+
+# Calls the relay with chosen inputs to exercise its rejections. Not a source in the manifest.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        default: henrik242/dispatch-demo-deploy
+      workflow:
+        default: deploy.yml
+  push:
+    branches: ['probe/**']
+
+permissions: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      id-token: write
+    env:
+      RELAY_URL: ${{ vars.DISPATCH_RELAY_URL }}
+      TARGET: ${{ inputs.target || 'henrik242/dispatch-demo-deploy' }}
+      WORKFLOW: ${{ inputs.workflow || 'deploy.yml' }}
+    steps:
+      - run: |
+          jwt=$(curl -sSf -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=entur-dispatch-relay" | jq -r .value)
+          body=$(jq -nc --arg t "$TARGET" --arg w "$WORKFLOW" '{target: $t, workflow: $w}')
+          curl -sS -w ' %{http_code}\n' -X POST -H "Authorization: Bearer $jwt" \
+            -H "User-Agent: entur-dispatch-$GITHUB_REPOSITORY" -H "Content-Type: application/json" \
+            -d "$body" "$RELAY_URL/v1/dispatch" | tee -a "$GITHUB_STEP_SUMMARY"
