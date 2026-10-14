@@ -21,18 +21,8 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       id-token: write
-    env:
-      RELAY_URL: ${{ vars.DISPATCH_RELAY_URL }}
     steps:
-      # Inline until entur/dispatch-relay is public; then switch back to the action:
-      # - uses: entur/dispatch-relay@686fcba7f2383962fc8bc974b94c3395d11c4f0e
-      #   with:
-      #     target: henrik242/dispatch-demo-app-deployment-config
-      #     relay-url: ${{ vars.DISPATCH_RELAY_URL }}
-      - shell: bash
-        run: |
-          jwt=$(curl -sSf -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=entur-dispatch-relay" | jq -r .value)
-          curl -sSf -H "Authorization: Bearer $jwt" -H "User-Agent: entur-dispatch-$GITHUB_REPOSITORY" \
-            -d '{"target":"henrik242/dispatch-demo-app-deployment-config","workflow":"deploy.yml"}' \
-            "$RELAY_URL/v1/dispatch" | jq -r '"Deploy run: \(.run_url)"' | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: entur/dispatch-relay/.github/actions/dispatch@060971479766910213969dd45cd08e6da6b796de
+        with:
+          target: henrik242/dispatch-demo-app-deployment-config
+          relay-url: ${{ vars.DISPATCH_RELAY_URL }}
