@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        default: henrik242/dispatch-demo-deploy
+        default: henrik242/dispatch-demo-app-deployment-config
       workflow:
         default: deploy.yml
   push:
@@ -21,7 +21,7 @@ jobs:
       id-token: write
     env:
       RELAY_URL: ${{ vars.DISPATCH_RELAY_URL }}
-      TARGET: ${{ inputs.target || 'henrik242/dispatch-demo-deploy' }}
+      TARGET: ${{ inputs.target || 'henrik242/dispatch-demo-app-deployment-config' }}
       WORKFLOW: ${{ inputs.workflow || 'deploy.yml' }}
     steps:
       - run: |

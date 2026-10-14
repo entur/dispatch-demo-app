@@ -27,12 +27,12 @@ jobs:
       # Inline until entur/dispatch-relay is public; then switch back to the action:
       # - uses: entur/dispatch-relay@686fcba7f2383962fc8bc974b94c3395d11c4f0e
       #   with:
-      #     target: henrik242/dispatch-demo-deploy
+      #     target: henrik242/dispatch-demo-app-deployment-config
       #     relay-url: ${{ vars.DISPATCH_RELAY_URL }}
       - shell: bash
         run: |
           jwt=$(curl -sSf -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=entur-dispatch-relay" | jq -r .value)
           curl -sSf -H "Authorization: Bearer $jwt" -H "User-Agent: entur-dispatch-$GITHUB_REPOSITORY" \
-            -d '{"target":"henrik242/dispatch-demo-deploy","workflow":"deploy.yml"}' \
+            -d '{"target":"henrik242/dispatch-demo-app-deployment-config","workflow":"deploy.yml"}' \
             "$RELAY_URL/v1/dispatch" | jq -r '"Deploy run: \(.run_url)"' | tee -a "$GITHUB_STEP_SUMMARY"
